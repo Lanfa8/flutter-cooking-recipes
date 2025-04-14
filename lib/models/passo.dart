@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 class Passo {
-   String id;
-   String instrucao;
-    String ordem;
+  String id;
+  String instrucao;
+  int ordem;
   String idReceita;
 
   Passo({
@@ -26,7 +26,7 @@ class Passo {
     return Passo(
       id: map['id'] as String,
       instrucao: map['instrucao'] as String,
-      ordem: map['ordem'] as String,
+      ordem: map['ordem'] as int,
       idReceita: map['id_receita'] as String,
     );
   }

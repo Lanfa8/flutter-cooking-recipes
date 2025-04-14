@@ -28,7 +28,7 @@ class Receita {
 
   factory Receita.fromMap(Map<String, dynamic> map) {
     return Receita(
-      id: map['nome'] as String,
+      id: map['id'] as String,
       nome: map['nome'] as String,
       nota: map['nota'] as int,
       tempoPreparo: map['tempo_preparo'] as int,

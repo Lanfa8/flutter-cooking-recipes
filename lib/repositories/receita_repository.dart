@@ -10,7 +10,7 @@ class ReceitaRepository {
 
   Future<List<Receita>> todosComNotaAcimaDe(int nota) async {
     var receitasNoBanco = await _db
-        .obterTodos("RECEITAS", condicao: 'NOTA <= ?', condicaoArgs: [nota]);
+        .obterTodos("RECEITAS", condicao: 'NOTA >= ?', condicaoArgs: [nota]);
     List<Receita> listaDeReceita = [];
 
     for (var i = 0; i < receitasNoBanco.length; i++) {

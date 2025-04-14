@@ -5,7 +5,7 @@ import 'package:sqflite/sqflite.dart';
 import '/database/sqls/receita_sql.dart';
 
 class DatabaseHelper {
-  static final String _nomeBancoDeDados = "receitas_flutter.db";
+  static final String _nomeBancoDeDados = "receitas_flutter_3.db";
   static final int _versaoBancoDeDados = 1;
   static late Database _bancoDeDados;
 
