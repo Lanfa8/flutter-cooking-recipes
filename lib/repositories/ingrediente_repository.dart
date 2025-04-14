@@ -30,4 +30,9 @@ class IngredienteRepository {
 
     return listaDeIngrediente;
   }
+
+  Future<int> totalIngredientesDeUmaReceita(String idReceita) async {
+    var ingredientesNoBanco = await todosDaReceita(idReceita);
+    return ingredientesNoBanco.length;
+  }
 }

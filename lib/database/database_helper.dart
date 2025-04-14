@@ -1,10 +1,11 @@
+import 'package:flutter_application_teste/database/sqls/ingrediente_sql.dart';
+import 'package:flutter_application_teste/database/sqls/passo_sql.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import '/database/sqls/pessoa_sql.dart';
 import '/database/sqls/receita_sql.dart';
 
 class DatabaseHelper {
-  static final String _nomeBancoDeDados = "receitas.db";
+  static final String _nomeBancoDeDados = "receitas_flutter.db";
   static final int _versaoBancoDeDados = 1;
   static late Database _bancoDeDados;
 
@@ -19,8 +20,9 @@ class DatabaseHelper {
   }
 
   Future criarBD(Database db, int versao) async {
-    db.execute(PessoaSql.criarTabelaPessoa());
     db.execute(ReceitaSql.criarTabelaReceitas());
+    db.execute(IngredienteSql.criarTabelaIngredientes());
+    db.execute(PassoSql.criarTabelaPassos());
   }
 
   Future atualizaBD(Database db, int oldVersion, int newVersion) async {

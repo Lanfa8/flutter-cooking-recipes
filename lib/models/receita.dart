@@ -6,6 +6,7 @@ class Receita {
   String nome;
   int nota;
   int tempoPreparo;
+  int? totalIngredientes;
   String createdAt;
 
   Receita({

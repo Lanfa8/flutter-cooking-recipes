@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '/screens/pessoa_list_screen.dart';
+import 'package:flutter_application_teste/screens/receita_list_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -10,6 +10,6 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: PessoaListScreen());
+    return const MaterialApp(home: ReceitaListScreen());
   }
 }
