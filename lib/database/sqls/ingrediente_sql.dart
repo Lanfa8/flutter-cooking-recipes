@@ -1,10 +1,11 @@
 class IngredienteSql {
   static String criarTabelaIngredientes() {
-    return "create table ingredientes (" 
-        "id text primary key, "
-        "id_receita text not null, " 
-        "nome text not null, "
-        "quantidade text not null " 
-      ")";
+    return '''CREATE TABLE ingredientes (
+          id TEXT PRIMARY KEY,
+          id_receita TEXT NOT NULL,
+          nome TEXT NOT NULL,
+          quantidade TEXT NOT NULL,
+          FOREIGN KEY (id_receita) REFERENCES receitas(id) ON DELETE CASCADE
+        )''';
   }
 }

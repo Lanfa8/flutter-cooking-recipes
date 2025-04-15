@@ -5,14 +5,12 @@ class Passo {
   String instrucao;
   int ordem;
   String idReceita;
-
   Passo({
     required this.id,
     required this.instrucao,
     required this.ordem,
     required this.idReceita,
   });
-
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
@@ -30,9 +28,7 @@ class Passo {
       idReceita: map['id_receita'] as String,
     );
   }
-
   String toJson() => json.encode(toMap());
-
   factory Passo.fromJson(String source) =>
       Passo.fromMap(json.decode(source) as Map<String, dynamic>);
 }

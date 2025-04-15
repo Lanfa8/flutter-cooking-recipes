@@ -5,14 +5,12 @@ class Ingrediente {
   String nome;
   String quantidade;
   String idReceita;
-
   Ingrediente({
     required this.id,
     required this.nome,
     required this.quantidade,
     required this.idReceita,
   });
-
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
@@ -30,9 +28,7 @@ class Ingrediente {
       idReceita: map['id_receita'] as String,
     );
   }
-
   String toJson() => json.encode(toMap());
-
   factory Ingrediente.fromJson(String source) =>
       Ingrediente.fromMap(json.decode(source) as Map<String, dynamic>);
 }
