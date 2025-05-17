@@ -63,6 +63,10 @@ class _ReceitaEditarScreenState extends State<ReceitaEditarScreen> {
     _passosEditaveis.sort((a, b) => a.ordem.compareTo(b.ordem));
     _nomeController.addListener(_marcarAlterado);
     _tempoPreparoController.addListener(_marcarAlterado);
+
+    if (widget.isNovaReceita && widget.receita.nome.isNotEmpty) {
+      _dadosForamAlterados = true;
+    }
   }
 
   void _marcarAlterado() {

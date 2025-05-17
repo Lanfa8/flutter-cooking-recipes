@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_teste/clients/randommer/randommer_client.dart';
+import 'package:flutter_application_teste/models/ingrediente.dart';
+import 'package:flutter_application_teste/models/passo.dart';
 import 'package:flutter_application_teste/screens/receita_editar_screen.dart';
 import '/models/receita.dart';
 import '/repositories/receita_repository.dart';
 import '/screens/receita_detalhe_screen.dart';
+import 'dart:math';
 import 'package:uuid/uuid.dart';
 
 class ReceitaListScreen extends StatefulWidget {
@@ -75,6 +79,115 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
     }
   }
 
+  Future<void> _navegarParaNovaReceitaComDadosDaAPI() async {
+    // Show loading indicator
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final randommerClient = RandommerClient();
+      final random = Random();
+
+      String receitaID = _uuid.v4();
+
+      final receitaSuggestionsTask = randommerClient.getSuggestions('receita');
+      final ingredienteSuggestionsTask = randommerClient.getSuggestions(
+        'ingrediente',
+      );
+      final passoSuggestionsTask = randommerClient.getSuggestions('passo_');
+
+      // Equivalent to js Promise.all
+      final results = await Future.wait([
+        receitaSuggestionsTask,
+        ingredienteSuggestionsTask,
+        passoSuggestionsTask,
+      ]);
+
+      final receitaSuggestions = results[0];
+      final ingredienteSuggestions = results[1];
+      final passoSuggestions = results[2];
+
+      int receitaSuggestionIdx =
+          0 + random.nextInt(receitaSuggestions.length - 1);
+      String nome = receitaSuggestions[receitaSuggestionIdx] as String;
+      int nota = 1 + random.nextInt(4);
+      int tempoPreparo = 20 + random.nextInt(100);
+
+      int qtdIngredientes = 1 + random.nextInt(9);
+      List<Ingrediente> ingredientes = [];
+      for (int i = 0; i < qtdIngredientes; i++) {
+        int qtdIngrediente = 1 + random.nextInt(9);
+
+        ingredientes.add(
+          Ingrediente(
+            id: _uuid.v4(),
+            nome: ingredienteSuggestions[i] as String,
+            quantidade: "$qtdIngrediente",
+            idReceita: receitaID,
+          ),
+        );
+      }
+
+      int qtdPassos = 1 + random.nextInt(10 - 1);
+      List<Passo> passos = [];
+      for (int i = 0; i < qtdPassos; i++) {
+        passos.add(
+          Passo(
+            id: _uuid.v4(),
+            instrucao: passoSuggestions[i] as String,
+            ordem: i + 1,
+            idReceita: receitaID,
+          ),
+        );
+      }
+
+      final novaReceita = Receita(
+        id: receitaID,
+        nome: nome,
+        nota: nota,
+        tempoPreparo: tempoPreparo,
+        createdAt: DateTime.now().toIso8601String(),
+      );
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        final result = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => ReceitaEditarScreen(
+                  receita: novaReceita,
+                  ingredientes: ingredientes,
+                  passos: passos,
+                  isNovaReceita: true,
+                ),
+          ),
+        );
+
+        if (result == true && mounted) {
+          _carregarReceitas();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao gerar receita: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _navegarParaNovaReceita() async {
     final novaReceita = Receita(
       id: _uuid.v4(),
@@ -106,8 +219,34 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
       appBar: AppBar(title: const Text('Minhas Receitas')),
       body: _buildBody(),
       floatingActionButton: FloatingActionButton(
-        onPressed: _navegarParaNovaReceita,
-        tooltip: 'Adicionar Nova Receita',
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return Wrap(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.note_add),
+                    title: const Text('Nova Receita'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _navegarParaNovaReceita();
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.upload_file),
+                    title: const Text('Nova receita com dados da API'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _navegarParaNovaReceitaComDadosDaAPI();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        tooltip: 'Ações',
         child: const Icon(Icons.add),
       ),
     );

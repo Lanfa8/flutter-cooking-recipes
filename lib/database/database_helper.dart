@@ -9,7 +9,7 @@ class DatabaseHelper {
   factory DatabaseHelper() => _instance;
   DatabaseHelper._internal();
   static Database? _database;
-  static const String _nomeBancoDeDados = "receitas_flutter_v4.db";
+  static const String _nomeBancoDeDados = "receitas_flutter_v5.db";
   static const int _versaoBancoDeDados = 1;
   Future<Database> get database async {
     if (_database != null) {
