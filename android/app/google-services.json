@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "506963583317",
+    "project_id": "cooking-recipes-28558",
+    "storage_bucket": "cooking-recipes-28558.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:506963583317:android:e06da9e351be3b340e0fdc",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_teste"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCb0hW6c7A40qY9yX2_hbpSEVASej-v0jU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

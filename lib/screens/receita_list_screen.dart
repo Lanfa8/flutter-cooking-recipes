@@ -3,6 +3,7 @@ import 'package:flutter_application_teste/clients/randommer/randommer_client.dar
 import 'package:flutter_application_teste/models/ingrediente.dart';
 import 'package:flutter_application_teste/models/passo.dart';
 import 'package:flutter_application_teste/screens/receita_editar_screen.dart';
+import 'package:flutter_application_teste/services/BackupService.dart';
 import '/models/receita.dart';
 import '/repositories/receita_repository.dart';
 import '/screens/receita_detalhe_screen.dart';
@@ -216,7 +217,38 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Minhas Receitas')),
+      appBar: AppBar(
+        title: const Text('Minhas Receitas'),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'backup_file') {
+                _fazerBackupArquivo();
+              } else if (value == 'backup_firestore') {
+                _fazerBackupFirestore();
+              }
+            },
+            itemBuilder:
+                (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'backup_file',
+                    child: ListTile(
+                      leading: Icon(Icons.description_outlined),
+                      title: Text('Backup para Arquivo'),
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'backup_firestore',
+                    child: ListTile(
+                      leading: Icon(Icons.cloud_upload_outlined),
+                      title: Text('Backup para Nuvem'),
+                    ),
+                  ),
+                ],
+            icon: const Icon(Icons.more_vert),
+          ),
+        ],
+      ),
       body: _buildBody(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -226,16 +258,16 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
               return Wrap(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.note_add),
-                    title: const Text('Nova Receita'),
+                    leading: const Icon(Icons.note_add_outlined),
+                    title: const Text('Nova Receita (em branco)'),
                     onTap: () {
                       Navigator.pop(context);
                       _navegarParaNovaReceita();
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.upload_file),
-                    title: const Text('Nova receita com dados da API'),
+                    leading: const Icon(Icons.auto_awesome_outlined),
+                    title: const Text('Gerar Receita com IA'),
                     onTap: () {
                       Navigator.pop(context);
                       _navegarParaNovaReceitaComDadosDaAPI();
@@ -246,7 +278,7 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
             },
           );
         },
-        tooltip: 'Ações',
+        tooltip: 'Adicionar Receita',
         child: const Icon(Icons.add),
       ),
     );
@@ -355,5 +387,65 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _fazerBackupArquivo() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final backupService = BackupService();
+    final success = await backupService.backupToFile();
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Backup realizado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Backup cancelado ou falhou.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _fazerBackupFirestore() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final backupService = BackupService();
+    final success = await backupService.backupToFirestore();
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Backup para o Firestore realizado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Falha ao realizar o backup para o Firestore.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
