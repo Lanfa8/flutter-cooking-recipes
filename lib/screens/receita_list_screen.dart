@@ -7,6 +7,7 @@ import 'package:flutter_application_teste/repositories/ingrediente_repository.da
 import 'package:flutter_application_teste/repositories/passo_repository.dart';
 import 'package:flutter_application_teste/screens/receita_editar_screen.dart';
 import 'package:flutter_application_teste/services/BackupService.dart';
+import 'package:flutter_application_teste/services/NotificationService.dart';
 import 'package:flutter_application_teste/services/RestoreService.dart';
 import '/models/receita.dart';
 import '/repositories/receita_repository.dart';
@@ -27,6 +28,8 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final IngredienteRepository _ingredienteRepository = IngredienteRepository();
   final PassoRepository _passoRepository = PassoRepository();
+
+  final NotificationService _notificationService = NotificationService();
 
   final Uuid _uuid = const Uuid();
   List<Receita> _receitas = [];
@@ -533,28 +536,19 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
     setState(() => _isLoading = false);
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Restauração concluída com sucesso!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      _notificationService.notificarSucesso('Restauração');
       _carregarReceitas();
     } else {
       if (cancelled) {
       } else if (noBackupFound) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Nenhum backup encontrado na nuvem.'),
-            backgroundColor: Colors.orange,
-          ),
+        _notificationService.notificarErro(
+          'Restauração',
+          'Nenhum backup encontrado na nuvem.',
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Falha na restauração.'),
-            backgroundColor: Colors.red,
-          ),
+        _notificationService.notificarErro(
+          'Restauração',
+          'Falha ao restaurar os dados.',
         );
       }
     }

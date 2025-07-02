@@ -158,7 +158,7 @@ class _ReceitaDetalheScreenState extends State<ReceitaDetalheScreen> {
 Future<void> _confirmarExclusao() async {
     if (_receita == null || _isLoading || _hasError) return;
 
-    final bool autenticado = await _localAuthService.authenticate();
+    final bool autenticado = await _localAuthService.authenticateOrBypass();
 
     if (!autenticado) {
       ScaffoldMessenger.of(context).showSnackBar(

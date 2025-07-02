@@ -13,7 +13,6 @@ import 'package:flutter_application_teste/repositories/passo_repository.dart';
 import 'package:flutter_application_teste/repositories/receita_repository.dart';
 import 'package:sqflite/sqflite.dart';
 
-// Função para decodificar JSON em background
 Map<String, dynamic> _parseJson(String jsonString) {
   return json.decode(jsonString) as Map<String, dynamic>;
 }
@@ -25,7 +24,6 @@ class RestoreService {
   final IngredienteRepository _ingredienteRepository;
   final PassoRepository _passoRepository;
 
-  // Construtor para receber as dependências
   RestoreService({
     required DatabaseHelper dbHelper,
     required ReceitaRepository receitaRepository,
@@ -37,7 +35,6 @@ class RestoreService {
         _passoRepository = passoRepository;
 
   Future<Map<String, dynamic>?> getDataFromFile() async {
-    // ... (este método continua igual)
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['json'],
@@ -52,7 +49,6 @@ class RestoreService {
   }
   
   Future<Map<String, dynamic>?> getDataFromFirestore() async {
-    // ... (este método continua igual)
      final backupQuery = await _firestore
         .collection('backups')
         .orderBy('createdAt', descending: true)
@@ -76,16 +72,13 @@ class RestoreService {
     return null;
   }
 
-
-  /// Escreve os dados de backup no banco de dados local.
-  /// Esta função deve ser chamada da thread principal.
   Future<bool> writeToDatabase(Map<String, dynamic> data) async {
     try {
       final dbPath = await _dbHelper.getDbPath();
-      await _dbHelper.close(); // Fecha a conexão atual se houver
-      await deleteDatabase(dbPath); // Apaga o arquivo antigo do banco
+      await _dbHelper.close();
+      await deleteDatabase(dbPath);
 
-      // Recria o banco e as tabelas
+
       await _dbHelper.database; 
 
       final receitas = (data['receitas'] as List).map((r) => Receita.fromMap(r)).toList();

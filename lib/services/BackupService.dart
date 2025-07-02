@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_application_teste/repositories/ingrediente_repository.dart';
 import 'package:flutter_application_teste/repositories/passo_repository.dart';
 import 'package:flutter_application_teste/repositories/receita_repository.dart';
+import 'package:flutter_application_teste/services/NotificationService.dart';
 import 'package:intl/intl.dart';
 
 class BackupService {
@@ -13,6 +14,7 @@ class BackupService {
   final PassoRepository _passoRepository = PassoRepository();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  final NotificationService _notificationService = NotificationService();
 
   Future<Map<String, dynamic>> _getAllData() async {
     final receitas = await _receitaRepository.todos();
@@ -42,15 +44,19 @@ class BackupService {
         final filePath = '$resultPath/$fileName';
         final file = File(filePath);
         await file.writeAsString(jsonString);
+        _notificationService.notificarSucesso('Backup em Arquivo');
         return true;
       }
       return false;
     } catch (e) {
+      _notificationService.notificarErro('Backup em Arquivo', e.toString());
+
       print("Erro ao fazer backup para arquivo: $e");
       return false;
     }
   }
-    Future<bool> backupToFirestore() async {
+
+  Future<bool> backupToFirestore() async {
     try {
       final allData = await _getAllData();
       final batch = _firestore.batch();
@@ -59,7 +65,6 @@ class BackupService {
       final backupId = 'backup_${timestamp.toIso8601String()}';
       final backupDocRef = _firestore.collection('backups').doc(backupId);
 
-
       batch.set(backupDocRef, {
         'createdAt': timestamp,
         'recipeCount': (allData['receitas'] as List).length,
@@ -67,14 +72,18 @@ class BackupService {
         'stepCount': (allData['passos'] as List).length,
       });
 
-
       for (var receita in (allData['receitas'] as List<Map<String, dynamic>>)) {
-        final receitaRef = backupDocRef.collection('receitas').doc(receita['id']);
+        final receitaRef = backupDocRef
+            .collection('receitas')
+            .doc(receita['id']);
         batch.set(receitaRef, receita);
       }
 
-      for (var ingrediente in (allData['ingredientes'] as List<Map<String, dynamic>>)) {
-        final ingredienteRef = backupDocRef.collection('ingredientes').doc(ingrediente['id']);
+      for (var ingrediente
+          in (allData['ingredientes'] as List<Map<String, dynamic>>)) {
+        final ingredienteRef = backupDocRef
+            .collection('ingredientes')
+            .doc(ingrediente['id']);
         batch.set(ingredienteRef, ingrediente);
       }
 
@@ -84,12 +93,13 @@ class BackupService {
       }
 
       await batch.commit();
+       _notificationService.notificarSucesso('Backup para Nuvem');
       return true;
-
     } catch (e) {
+      _notificationService.notificarErro('Backup para Nuvem', e.toString());
+
       print("Erro ao fazer backup para o Firestore: $e");
       return false;
     }
   }
-
 }

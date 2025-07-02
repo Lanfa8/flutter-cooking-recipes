@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_teste/firebase_options.dart';
 import 'package:flutter_application_teste/screens/login_screen.dart';
+import 'package:flutter_application_teste/services/NotificationService.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '/screens/receita_list_screen.dart';
 
@@ -12,6 +13,10 @@ void main()  async{
     options: DefaultFirebaseOptions.currentPlatform
   );
   await dotenv.load();
+
+    
+  await NotificationService().init();
+  await NotificationService().requestPermissions();
   runApp(const MainApp());
 }
 
