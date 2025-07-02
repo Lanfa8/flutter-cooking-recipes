@@ -39,13 +39,7 @@ class MainApp extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-        cardTheme: CardTheme(
-          elevation: 2,
-          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
+       
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: Colors.orange,
           foregroundColor: Colors.white,

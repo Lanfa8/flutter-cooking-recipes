@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_teste/clients/randommer/randommer_client.dart';
+import 'package:flutter_application_teste/database/database_helper.dart';
 import 'package:flutter_application_teste/models/ingrediente.dart';
 import 'package:flutter_application_teste/models/passo.dart';
+import 'package:flutter_application_teste/repositories/ingrediente_repository.dart';
+import 'package:flutter_application_teste/repositories/passo_repository.dart';
 import 'package:flutter_application_teste/screens/receita_editar_screen.dart';
 import 'package:flutter_application_teste/services/BackupService.dart';
+import 'package:flutter_application_teste/services/RestoreService.dart';
 import '/models/receita.dart';
 import '/repositories/receita_repository.dart';
 import '/screens/receita_detalhe_screen.dart';
@@ -18,12 +22,24 @@ class ReceitaListScreen extends StatefulWidget {
 
 class _ReceitaListScreenState extends State<ReceitaListScreen> {
   final ReceitaRepository _receitaRepository = ReceitaRepository();
+
+  late final RestoreService _restoreService;
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+  final IngredienteRepository _ingredienteRepository = IngredienteRepository();
+  final PassoRepository _passoRepository = PassoRepository();
+
   final Uuid _uuid = const Uuid();
   List<Receita> _receitas = [];
   bool _isLoading = true;
   @override
   void initState() {
     super.initState();
+    _restoreService = RestoreService(
+      dbHelper: _dbHelper,
+      receitaRepository: _receitaRepository,
+      ingredienteRepository: _ingredienteRepository,
+      passoRepository: _passoRepository,
+    );
     _carregarReceitas();
   }
 
@@ -81,7 +97,6 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
   }
 
   Future<void> _navegarParaNovaReceitaComDadosDaAPI() async {
-    // Show loading indicator
     setState(() {
       _isLoading = true;
     });
@@ -226,6 +241,8 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
                 _fazerBackupArquivo();
               } else if (value == 'backup_firestore') {
                 _fazerBackupFirestore();
+              } else if (value == 'restore') {
+                _showRestoreDialog();
               }
             },
             itemBuilder:
@@ -242,6 +259,14 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
                     child: ListTile(
                       leading: Icon(Icons.cloud_upload_outlined),
                       title: Text('Backup para Nuvem'),
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  const PopupMenuItem<String>(
+                    value: 'restore',
+                    child: ListTile(
+                      leading: Icon(Icons.restore),
+                      title: Text('Restaurar Backup'),
                     ),
                   ),
                 ],
@@ -442,6 +467,92 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Falha ao realizar o backup para o Firestore.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showRestoreDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Restaurar Dados'),
+            content: const Text('De onde você deseja restaurar os dados?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _restaurarDeArquivo();
+                },
+                child: const Text('Arquivo Local'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _restaurarDoFirestore();
+                },
+                child: const Text('Nuvem (Firestore)'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Future<void> _restaurarDeArquivo() async {
+    setState(() => _isLoading = true);
+    final data = await _restoreService.getDataFromFile();
+    if (data != null) {
+      final success = await _restoreService.writeToDatabase(data);
+      _handleRestoreResult(success);
+    } else {
+      _handleRestoreResult(false, cancelled: true);
+    }
+  }
+
+  Future<void> _restaurarDoFirestore() async {
+    setState(() => _isLoading = true);
+    final data = await _restoreService.getDataFromFirestore();
+    if (data != null) {
+      final success = await _restoreService.writeToDatabase(data);
+      _handleRestoreResult(success);
+    } else {
+      _handleRestoreResult(false, noBackupFound: true);
+    }
+  }
+
+  void _handleRestoreResult(
+    bool success, {
+    bool cancelled = false,
+    bool noBackupFound = false,
+  }) {
+    if (!mounted) return;
+
+    setState(() => _isLoading = false);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Restauração concluída com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      _carregarReceitas(); // Recarrega a lista de receitas
+    } else {
+      if (cancelled) {
+      } else if (noBackupFound) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Nenhum backup encontrado na nuvem.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Falha na restauração.'),
             backgroundColor: Colors.red,
           ),
         );

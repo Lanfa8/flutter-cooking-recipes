@@ -102,6 +102,17 @@ class DatabaseHelper {
     return resultado.isNotEmpty ? resultado.first : null;
   }
 
+  Future<void> clearDatabase() async {
+    final db = await database;
+    await db.delete('passos');
+    await db.delete('ingredientes');
+    await db.delete('receitas');
+  }
+
+  Future<String> getDbPath() async {
+    return join(await getDatabasesPath(), _nomeBancoDeDados);
+  }
+
   Future<void> close() async {
     final db = await database;
     await db.close();
