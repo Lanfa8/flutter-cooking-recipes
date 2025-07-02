@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_teste/clients/randommer/randommer_client.dart';
 import 'package:flutter_application_teste/database/database_helper.dart';
@@ -239,13 +240,15 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
         title: const Text('Minhas Receitas'),
         actions: [
           PopupMenuButton<String>(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == 'backup_file') {
                 _fazerBackupArquivo();
               } else if (value == 'backup_firestore') {
                 _fazerBackupFirestore();
               } else if (value == 'restore') {
                 _showRestoreDialog();
+              } else if (value == 'logout') {
+                await FirebaseAuth.instance.signOut();
               }
             },
             itemBuilder:
@@ -272,6 +275,14 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
                       title: Text('Restaurar Backup'),
                     ),
                   ),
+                  const PopupMenuDivider(),
+                  const PopupMenuItem<String>(
+                    value: 'logout',
+                    child: ListTile(
+                      leading: Icon(Icons.exit_to_app),
+                      title: Text('Sair'),
+                    ),
+                  ),
                 ],
             icon: const Icon(Icons.more_vert),
           ),
@@ -294,8 +305,8 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.auto_awesome_outlined),
-                    title: const Text('Gerar Receita com IA'),
+                    leading: const Icon(Icons.upload_file),
+                    title: const Text('Nova receita com dados da API'),
                     onTap: () {
                       Navigator.pop(context);
                       _navegarParaNovaReceitaComDadosDaAPI();
