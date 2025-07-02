@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_teste/services/LocalAuthService.dart';
 import 'package:intl/intl.dart';
 import '/models/receita.dart';
 import '/models/ingrediente.dart';
@@ -19,6 +20,9 @@ class _ReceitaDetalheScreenState extends State<ReceitaDetalheScreen> {
   final ReceitaRepository _receitaRepository = ReceitaRepository();
   final IngredienteRepository _ingredienteRepository = IngredienteRepository();
   final PassoRepository _passoRepository = PassoRepository();
+
+  final LocalAuthService _localAuthService = LocalAuthService();
+
   Receita? _receita;
   List<Ingrediente> _ingredientes = [];
   List<Passo> _passos = [];
@@ -151,8 +155,21 @@ class _ReceitaDetalheScreenState extends State<ReceitaDetalheScreen> {
     }
   }
 
-  Future<void> _confirmarExclusao() async {
+Future<void> _confirmarExclusao() async {
     if (_receita == null || _isLoading || _hasError) return;
+
+    final bool autenticado = await _localAuthService.authenticate();
+
+    if (!autenticado) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Autenticação falhou ou foi cancelada.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     final bool? confirmar = await showDialog<bool>(
       context: context,
       builder:

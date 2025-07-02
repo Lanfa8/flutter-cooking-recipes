@@ -539,7 +539,7 @@ class _ReceitaListScreenState extends State<ReceitaListScreen> {
           backgroundColor: Colors.green,
         ),
       );
-      _carregarReceitas(); // Recarrega a lista de receitas
+      _carregarReceitas();
     } else {
       if (cancelled) {
       } else if (noBackupFound) {
